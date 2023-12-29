@@ -28,7 +28,7 @@ public class ChatbotController {
         this.chatbotService = chatbotService;
     }
 
-    @ApiOperation(value = "FAQ 챗봇 리스트 조회 요청", notes = "현재 등록된 FAQ 챗봇용 질문과 답변 리스트를 조회합니다.", tags = {"FAQ 챗봇 리스트 조회"})
+    @ApiOperation(value = "서포트봇 전체 조회 요청", notes = "현재 등록된 FAQ 서포트봇용 질문과 답변 리스트를 전체 조회합니다.", tags = {"서포트봇 전체 조회"})
     @GetMapping("/list")
     public ResponseEntity<ResponseMessageDTO> selectChatbotResultList() {
         HttpHeaders headers = new HttpHeaders();
@@ -42,7 +42,7 @@ public class ChatbotController {
         return new ResponseEntity<>(responseMessage, headers, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "FAQ 챗봇 단건 조회 요청", notes = "현재 등록된 FAQ 챗봇용 질문과 답변 단건을 질문코드를 조건으로 조회합니다.", tags = {"FAQ 챗봇 단건 조회"})
+    @ApiOperation(value = "서포트봇 상세 조회 요청", notes = "현재 등록된 FAQ 서포트봇용 질문과 답변 단건을 질문코드를 조건으로 조회합니다.", tags = {"서포트봇 상세 조회"})
     @GetMapping("/{questionCode}")
     public ResponseEntity<ResponseMessageDTO> selectChatbotResultOne(@PathVariable int questionCode) {
 
