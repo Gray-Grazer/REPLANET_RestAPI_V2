@@ -1,6 +1,7 @@
 package metaint.replanet.rest.org.controller;
 
 
+import io.swagger.annotations.ApiOperation;
 import metaint.replanet.rest.org.dto.OrgRequestDTO;
 import metaint.replanet.rest.org.entity.Organization;
 import metaint.replanet.rest.org.service.OrgService;
@@ -40,20 +41,8 @@ public class OrgController {
     public OrgController (OrgService orgService){
         this.orgService = orgService;
     }
-    
-    // 기부처 등록 (관리자 간단 정보)
-    public void orgRegist(){}
-    // 기부처 프로필 등록 ( 소개, 연락처, 사진 등)
 
-    public void orgUpdateInfo(){}
-
-    // 기부처 캠페인 등록
-    public void campaignRegist(){
-
-    }
-
-
-
+    @ApiOperation(value = "기부처 정보 전체 조회 요청", notes = "등록된 기부처를 전체 조회합니다.", tags = {"기부처 전체 조회"})
     @GetMapping("/orgs")
     public ResponseEntity<List<Map<String, Object>>> getOrgs() {
         // 유효성 체크한다고 하면 현재 로그인한 놈의 ROLE_ADMIN인지 확인하는 정도 
@@ -63,18 +52,14 @@ public class OrgController {
 
     }
 
-
+    @ApiOperation(value = "기부처 정보 상세 조회", notes = "등록된 기부처의 비밀번호를 검증합니다.", tags = {"기부처 상세 조회"})
     @GetMapping("orgInfo/{memberCode}")
     public ResponseEntity<?> selectOrgInformation(@PathVariable int memberCode,
                                                   @RequestParam String orgPwd){
 
-        log.info("기부처 코드 확인 : " + memberCode);
-        log.info("비밃번호 넘어왔는지 확인 : " + orgPwd);
         int verify = orgService.verifyPassword(memberCode, orgPwd);
-        log.info("verify는 " + verify);
         if(verify == 1){
             List<Map<String, Object>> orgInformation = orgService.selectOrgInformation(memberCode);
-            log.info("정보 확인~ " + orgInformation);
             return ResponseEntity.status(HttpStatus.OK).body(orgInformation);
         } else if(verify == 0){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("비밀번호가 일치하지 않습니다.");
@@ -82,23 +67,19 @@ public class OrgController {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("비밀번호를 검증하지 못했습니다.");
     }
 
+    @ApiOperation(value = "기부처 정보 수정 요청", notes = "등록된 기부처의 정보를 수정합니다.", tags = {"기부처 정보 수정"})
     @PostMapping("orgModify/{memberCode}")
     public ResponseEntity<?> updateOrgInformation(@PathVariable int memberCode, @RequestPart(value = "file", required = false)MultipartFile orgImg,
                                                   @RequestPart(value = "orgDescription") String orgDescription, @RequestPart(value = "password") String password,
                                                   @RequestPart(value = "memberName") String memberName, @RequestPart(value = "phone") String phone){
 
-        log.info("기부처 코드 확인 : " + memberCode);
-        log.info("기부처 소개 넘어왔는지 확인 : " + orgDescription);
         MemberDTO memberDTO = new MemberDTO();
         memberDTO.setPassword(password);
         memberDTO.setMemberName(memberName.substring(1, memberName.length()-1));
         memberDTO.setPhone(phone);
         memberDTO.setMemberCode(memberCode);
-        log.info("기부처 정보 넘어왔는지 확인 : " + memberDTO);
 
         if(orgImg != null){
-            //이미지가 바뀌었을 때
-            log.info("기부처 이미지 넘어왔는지 확인 : " + orgImg);
             try{
                 String fileOriginName = orgImg.getOriginalFilename();
                 String fileExtension = fileOriginName.substring(fileOriginName.lastIndexOf("."));
@@ -118,7 +99,6 @@ public class OrgController {
                     Path relativePath = rootPath.resolve(filePath2);
                     FILE_DIR = String.valueOf(relativePath);
                 }
-                log.info("저장 경로 확인 : " + FILE_DIR);
                 OrgRequestDTO orgUpdate = new OrgRequestDTO();
                 orgUpdate.setFileOriginName(fileOriginName);
                 orgUpdate.setFileSaveName(fileSaveName);
@@ -131,7 +111,6 @@ public class OrgController {
                     File directory = new File(FILE_DIR);
                     if (!directory.exists()) {
                         directory.mkdirs();
-                        log.info("저장경로가 존재하지 않아 새로 생성되었습니다.");
                     }
                     File pf = new File(FILE_DIR + "/" + fileSaveName);
                     orgImg.transferTo(pf);
@@ -165,36 +144,29 @@ public class OrgController {
             }
         }
     }
-  
+
+    @ApiOperation(value = "기부처 탈퇴 처리", notes = "기부처 정보 삭제", tags = {"기부처 정보 삭제"})
     @PutMapping("/withdrawOrg")
     public void putWithdrawOrg(@RequestBody MemberDTO memberDTO, HttpServletResponse response){
-        log.info("[/withdrawOrg] ==================================== ");
 
         Long memberCode = (long) memberDTO.getMemberCode();
-        log.info("[/withdrawOrg 받아온 memberCode] : " + memberCode);
 
         if (memberCode > 0) {
             int result = orgService.deleteOrgByMemberCode(memberCode);
 
             if (result > 0) {
-                log.info("[/withdrawOrg] 기부처 삭제 성공 ====================");
                 response.setStatus(HttpServletResponse.SC_OK);
             } else {
-                log.error("[/withdrawOrg] 기부처 삭제 실패 ====================");
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             }
         } else {
-            log.error("[/withdrawOrg] 유효한 memberCode가 아닙니다. ====================");
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 
+    @ApiOperation(value = "기부처 탈퇴 요청", notes = "로그인한 기부처의 비밀번호와 진행중인 캠페인이 없는지 검증한 후, 등록된 기부처 정보를 삭제 요청합니다.", tags = {"기부처 정보 삭제 요청"})
     @PutMapping("orgWithdraw/{memberCode}")
     public ResponseEntity<?> updateOrgWithdraw(@PathVariable int memberCode, @RequestParam(value = "enterReason") String withdrawReason, @RequestParam(value = "password") String password){
-
-        log.info("기부처코드 확인 : " + memberCode);
-        log.info("사유 확인1 : " + withdrawReason);
-        log.info("비밀번호 확인 : " + password);
 
         OrgRequestDTO newRequest = new OrgRequestDTO();
         newRequest.setOrgCode(memberCode);
@@ -204,7 +176,6 @@ public class OrgController {
         int verify = orgService.verifyPassword(memberCode, password);
 
         int check = orgService.checkCampaign(memberCode);
-        log.info("check는 " + check);
 
         if(check > 0){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("campaigns");
@@ -221,6 +192,6 @@ public class OrgController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("WrongPwd");
             }
         }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("비밀번호 검증 혹은 진행중인 캠페이 조회 오류.");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("비밀번호 검증 혹은 진행중인 캠페인 조회 오류.");
     }
 }
