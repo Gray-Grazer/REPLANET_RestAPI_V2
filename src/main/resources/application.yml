@@ -21,9 +21,9 @@ spring:
         show_sql: true
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://mysql.coffit.today:3306/replanet
-    username: HIkdt6
-    password: HIkdt6
+    url: jdbc:mysql://localhost:8001/replanet
+    username: root
+    password: 1234
   servlet:
     multipart:
       max-file-size: 5MB
