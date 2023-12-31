@@ -36,8 +36,6 @@ public class ExchangeController {
                                              @RequestPart(value = "memberCode") String memberCode) throws UnsupportedEncodingException {
 
         String title1 = title.substring(1, title.length()-1); //인코딩 문제로 blob으로 넘겨주면서 생긴 앞뒤 "" 자름
-        log.info("제목 넘어왔나요?" + title1);
-        log.info("코드 넘어왔나요?" + memberCode);
 
         if(title != null && pointFile != null) {
             ExchangeDTO newExchange = new ExchangeDTO();
@@ -45,12 +43,8 @@ public class ExchangeController {
             newExchange.setTitle(title1);
             newExchange.setMemberCode(Integer.parseInt(memberCode));
 
-            log.info("DTO 확인 " + newExchange);
-
             try {
                 int savedExchangeCode = exchangeService.insertExchange(newExchange);
-
-                log.info("저장된 코드 확인 " + savedExchangeCode);
 
                 String fileOriginName = pointFile.getOriginalFilename();
                 String fileExtension = fileOriginName.substring(fileOriginName.lastIndexOf("."));
@@ -70,7 +64,6 @@ public class ExchangeController {
                     Path relativePath = rootPath.resolve(filePath2);
                     FILE_DIR = String.valueOf(relativePath);
                 }
-                log.info("저장 경로 확인 : " + FILE_DIR);
 
                 PointFileDTO newFile = new PointFileDTO();
                 newFile.setFileOriginName(fileOriginName);
@@ -83,7 +76,6 @@ public class ExchangeController {
                     File directory = new File(FILE_DIR);
                     if(!directory.exists()){
                         directory.mkdirs();
-                        log.info("저장경로가 존재하지 않아 새로 생성되었습니다.");
                     }
                     File pf = new File(FILE_DIR + "/" + fileSaveName);
                     pointFile.transferTo(pf);
@@ -104,7 +96,6 @@ public class ExchangeController {
     public List<ExchangeDTO> selectAllExchanges(){
 
         List<ExchangeDTO> exchangeList = exchangeService.selectAllExchanges();
-        log.info("exchangeList 확인 : " + exchangeList);
         return exchangeList;
 //        return ResponseEntity.status(HttpStatus.OK).body(exchangeList);
     }
@@ -112,15 +103,12 @@ public class ExchangeController {
     @GetMapping("/exchanges/{status}")
     public ResponseEntity<List<ExchangeDTO>> selectMemberAllExchange(@PathVariable String status){
 
-        log.info("status 확인 : " + status);
         List<ExchangeDTO> listByStatus = new ArrayList<>();
         if(status.equals("전체")){
             listByStatus = exchangeService.selectAllExchanges();
         } else {
             listByStatus = exchangeService.selectExchangesByStatus(status);
         }
-        log.info("list 확인 : " + listByStatus);
-
         return ResponseEntity.status(HttpStatus.OK).body(listByStatus);
     }
 
