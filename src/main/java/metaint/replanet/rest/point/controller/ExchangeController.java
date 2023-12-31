@@ -1,5 +1,6 @@
 package metaint.replanet.rest.point.controller;
 
+import io.swagger.annotations.ApiOperation;
 import metaint.replanet.rest.point.dto.ExchangeDTO;
 import metaint.replanet.rest.point.dto.PointFileDTO;
 import metaint.replanet.rest.point.service.ExchangeService;
@@ -92,6 +93,7 @@ public class ExchangeController {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("신청 오류");
     }
 
+    @ApiOperation(value = "포인트 전환 신청 목록 전체 조회 요청", notes = "포인트 전환 신청 목록을 전체 조회합니다.", tags = {"포인트 전환 전체 조회"})
     @GetMapping("exchanges")
     public List<ExchangeDTO> selectAllExchanges(){
 
@@ -100,6 +102,7 @@ public class ExchangeController {
 //        return ResponseEntity.status(HttpStatus.OK).body(exchangeList);
     }
 
+    @ApiOperation(value = "포인트 전환 신청 목록 조건 조회 요청", notes = "포인트 전환 신청 목록을 상태별로 조건 조회합니다.", tags = {"포인트 전환 조건 조회"})
     @GetMapping("/exchanges/{status}")
     public ResponseEntity<List<ExchangeDTO>> selectMemberAllExchange(@PathVariable String status){
 
@@ -112,19 +115,17 @@ public class ExchangeController {
         return ResponseEntity.status(HttpStatus.OK).body(listByStatus);
     }
 
+    @ApiOperation(value = "포인트 전환 신청 목록 상세 조회 요청", notes = "포인트 전환 신청 목록을 상세 조회합니다.", tags = {"포인트 전환 상세 조회"})
     @GetMapping("exchanges/{exchangeCode}/detail")
     public ResponseEntity<Map<String, Object>> selectExchangeDetail(@PathVariable int exchangeCode){
 
-        log.info("전환 신청 코드 " + exchangeCode);
         Map<String, Object> exchangeDetailA = exchangeService.selectExchangeDetailA(exchangeCode);
-        log.info("조회 값 확인 : " + exchangeDetailA);
         return ResponseEntity.status(HttpStatus.OK).body(exchangeDetailA);
     }
 
     @GetMapping("users/{memberCode}/exchanges")
     public ResponseEntity<List<ExchangeDTO>> selectMemberAllExchange(@PathVariable int memberCode){
 
-        log.info("memberCode 확인 : " + memberCode);
         List<ExchangeDTO> memberAllExchange = exchangeService.selectMemberAllExchange(memberCode);
         return ResponseEntity.status(HttpStatus.OK).body(memberAllExchange);
     }
@@ -132,9 +133,7 @@ public class ExchangeController {
     @GetMapping("users/exchangeDetail/{exchangeCode}")
     public ResponseEntity<?> selectExchangeDetailU(@PathVariable int exchangeCode){
 
-        log.info("전환 신청 코드 : " + exchangeCode);
         Map<String, Object> exchangeDetailU = exchangeService.selectExchangeDetailU(exchangeCode);
-        log.info("조회 값 확인 : " + exchangeDetailU);
         return ResponseEntity.status(HttpStatus.OK).body(exchangeDetailU);
     }
 
@@ -144,11 +143,8 @@ public class ExchangeController {
                                                   @RequestBody ExchangeDTO exchangeDTO){
 
         int result = 0;
-        log.info("excjangeDTO 확인 : " + exchangeDTO);
-        log.info("상태 확인 : " + exchangeDTO.getStatus());
         System.out.println(exchangeDTO.getStatus());
         if("승인".equals(exchangeDTO.getStatus())){
-            log.info(exchangeDTO.getStatus());
             result = exchangeService.exchangeApproval(exchangeDTO);
             if(result == 1){
                 return ResponseEntity.status(HttpStatus.OK).body("신청 처리 완료");
@@ -156,7 +152,6 @@ public class ExchangeController {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("신청 처리 중 오류 발생");
             }
         } else if("반려".equals(exchangeDTO.getStatus())){
-            log.info(exchangeDTO.getStatus());
             result = exchangeService.exchangeRejection(exchangeDTO);
             if(result == 1){
                 return ResponseEntity.status(HttpStatus.OK).body("신청 처리 완료");
@@ -170,7 +165,6 @@ public class ExchangeController {
     @GetMapping("users/{memberCode}/points")
     public ResponseEntity<?> selectMemberPoints(@PathVariable int memberCode){
 
-        log.info("멤버코드 확인 : " + memberCode);
         List<Map<String, Object>> pointHistory = exchangeService.selectMemberPoints(memberCode);
         return ResponseEntity.status(HttpStatus.OK).body(pointHistory);
     }
